@@ -14,7 +14,7 @@ class Info(commands.Cog):
         await ctx.send(embed=embed)
     @commands.command(aliases=['bothelp'])
     async def help(self, ctx):
-        embed=discord.Embed(title="Bot Help", url="https://github.com/TheGamer3514/Yellow-Pterodactyl, description="**Info:**\n``!help`` - Shows The Help Embed\n``!botinfo`` - Shows The Bot Info\n``!credits`` - Shows The Bot Credits\n``!stats`` - Shows The Bot Stats\n``!update`` - Shows The Bot Update Logs\n**Fun:**\n``!magic8ball`` - Ask the magic 8ball a question or two!\n**Utility:**\n``!avatar`` - Get a user's avatar!", color=0xFCBA03)
+        embed=discord.Embed(title="Bot Help", url="https://github.com/TheGamer3514/Yellow-Pterodactyl", description="**Info:**\n``!help`` - Shows The Help Embed\n``!botinfo`` - Shows The Bot Info\n``!credits`` - Shows The Bot Credits\n``!stats`` - Shows The Bot Stats\n``!update`` - Shows The Bot Update Logs\n**Fun:**\n``!magic8ball`` - Ask the magic 8ball a question or two!\n**Utility:**\n``!avatar`` - Get a user's avatar!", color=0xFCBA03)
         await ctx.send(embed=embed)
     @commands.command(aliases=['botcredits'])
     async def credits(self, ctx):
