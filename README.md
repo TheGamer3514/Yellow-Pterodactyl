@@ -1,6 +1,6 @@
 # Yellow Pterodactyl
 A discord bot that can do everything! 
-
+![Discord Bots](https://top.gg/api/widget/1037361246464393216.svg)
 # Note:
 This bot is in active development! To speed up the development, why not make a pull request?
 
