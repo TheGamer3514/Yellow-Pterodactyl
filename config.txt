@@ -1,8 +1,0 @@
-{
-    "botConfig": [
-        {
-            "token": "token here",
-            "prefix": "prefix here"
-         }
-    ]
-}
