@@ -1,6 +1,16 @@
+> # **⚠️ New Version In The Making**<br>
+> I am currently working on completly rewriting this bot, this current code may contain lots of bugs / not work at all. It is not recommended that you attempt to use this code until this notice vanishes.
+
+
+
+
+
+
+
+
 ![Discord Bots](https://top.gg/api/widget/1037361246464393216.svg)
 # Yellow Pterodactyl
-A discord bot that can do everything! 
+A discord bot.
 # Note:
 This bot is in active development! To speed up the development, why not make a pull request?
 
