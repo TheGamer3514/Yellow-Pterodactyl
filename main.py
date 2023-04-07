@@ -209,7 +209,6 @@ async def ban(ctx, member : discord.Member, *, reason = None):
     else:
         embed = discord.Embed(colour=discord.Colour.red(), title="Error!", description=f"You do not have enough permissions to ban {member}")
         await ctx.send(embed=embed)
-
 #Unban Command
 @bot.command(aliases=['unbanuser'])
 async def unban(ctx, *, member):
