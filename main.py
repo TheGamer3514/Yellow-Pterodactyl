@@ -5,9 +5,12 @@ import asyncio
 import psutil
 from discord_webhook import DiscordWebhook
 import random
+import shutil
 import multiprocessing
+import requests
 import logging
 from discord.ext import commands
+quotes = ["You miss 100% of the shots you don't take. - Wayne Gretzky", "Procrastination is one of the most common and deadliest of diseases and its toll on success and happiness is heavy.  - Wayne Gretzky", "That's one small step for a man, a giant leap for mankind. - Neil Armstrong", "The only thing we have to fear is fear itself. - Franklin D. Roosevelt","Inspiration does exist, but it must find you working. — Pablo Picasso"]
 ball8answers = ['It is certain', 'It is decidedly so', 'Without a doubt', 'Yes - definitely', 'You may rely on it', 'As I see it, yes', 'Most likely', 'Outlook good', 'Yes Signs point to yes', 'Reply hazy', 'try again', 'Ask again later', 'Better not tell you now', 'Cannot predict now', 'Concentrate and ask again', 'Dont count on it', 'My reply is no', 'My sources say no', 'Outlook not so good', 'Very doubtful']
 handler = logging.FileHandler(filename='errors.log', encoding='utf-8', mode='w')
 #load config
@@ -66,6 +69,7 @@ class HelpDropdown(discord.ui.Select):
         elif self.values[0] == "Fun":
             embed=discord.Embed(title="Yellow Pterodactyl - Fun Commands", colour=discord.Colour.random())
             embed.add_field(name=f"{c['prefix']}8ball",value="Use a magic 8 ball.",inline=False)
+            embed.add_field(name=f"{c['prefix']}cat",value="Generate an image of a cat.",inline=False)
             embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "Utility":
@@ -96,7 +100,8 @@ class HelpDropdownView(discord.ui.View):
 @bot.command(aliases=['bothelp'])
 async def help(ctx):
     await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}help")
-    embed=discord.Embed(title="Yellow Pterodactyl", description="Version 2.0", colour=discord.Colour.random())
+    quote = quotes[random.randint(0, len(quotes)-1)]
+    embed=discord.Embed(title="Yellow Pterodactyl", description=f"**Version:** 2.0\nYellow Pterodactyl, a multipurpouse discord bot. Fun, Utility, Moderation and more to come! Why not give me a try?\n**Quote Of The Second:** {quote}", colour=discord.Colour.random())
     view = HelpDropdownView()
     await ctx.send(view=view,embed=embed)
 #Stats Command
@@ -133,6 +138,18 @@ async def magic8ball(ctx):
     await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}8ball")
     embed=discord.Embed(title=":8ball: Magic 8 Ball :8ball:", description=ball8answers[random.randint(0, len(ball8answers)-1)], colour=discord.Colour.random())
     await ctx.send(embed=embed)
+#Cat Command
+@bot.command(aliases=['catimage'])
+async def cat(ctx):
+    response = requests.get(f"https://api.sillychat.tech/cat?key={c['sillychatapikey']}", stream=True)
+    with open('temp/cat.png', 'wb') as out_file:
+        shutil.copyfileobj(response.raw, out_file)
+    del response
+    await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}cat")
+    embed=discord.Embed(title="Cat 🐈", colour=discord.Colour.random())
+    file = discord.File("temp/cat.png", filename="cat.png")
+    embed.set_image(url="attachment://cat.png")
+    await ctx.send(file=file,embed=embed)
 #--------------------------------Utility---------------------------------------
 #Server Info Command
 @bot.command(aliases=['guildinfo'])  
