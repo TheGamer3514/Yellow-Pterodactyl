@@ -1,6 +1,5 @@
 #import modules
 import discord
-import os
 import json
 import asyncio
 import psutil
@@ -20,7 +19,7 @@ with open('./config.json') as f:
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
-bot = commands.AutoShardedBot(command_prefix = c['prefix'],intents=intents,status=discord.Status.idle,case_insensitive=True)
+bot = commands.AutoShardedBot(command_prefix = c['prefix'],intents=intents,status=discord.Status.dnd,case_insensitive=True)
 bot.remove_command('help')
 #------------------------------------------Bot Events-------------------------------------------------
 #Auto Updating Status
@@ -55,7 +54,6 @@ class HelpDropdown(discord.ui.Select):
             discord.SelectOption(label='Moderation', description='Get a list of moderation related commands.', emoji='<:maintenace:926794294017286165>'),
         ]
         super().__init__(placeholder='Choose Command Category', min_values=1, max_values=1, options=options)
-
     async def callback(self, interaction: discord.Interaction):
         if self.values[0] == "Info":
             embed=discord.Embed(title="Yellow Pterodactyl - Info Commands", colour=discord.Colour.random())
@@ -88,8 +86,6 @@ class HelpDropdown(discord.ui.Select):
             embed=discord.Embed(title="Yellow Pterodactyl - Error!", description="Somehow you selected a choice i did not know was there!",colour=discord.Colour.red())
             embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
             await interaction.response.edit_message(embed=embed)
-
-
 class HelpDropdownView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
