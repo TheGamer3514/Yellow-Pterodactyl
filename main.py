@@ -51,8 +51,8 @@ class HelpDropdown(discord.ui.Select):
         options = [
             discord.SelectOption(label='Info', description='Get a list of info related commands.', emoji='<:info:1071407819670175774>'),
             discord.SelectOption(label='Fun', description='Get a list of fun related commands.', emoji='<:awesome:1093813270802075728>'),
-            discord.SelectOption(label='Utility', description='Get a list of utility related commands.', emoji='🟦'),
-            discord.SelectOption(label='Moderation', description='Get a list of moderation related commands.', emoji='🟥'),
+            discord.SelectOption(label='Utility', description='Get a list of utility related commands.', emoji='<a:arrow:942025249908752395>'),
+            discord.SelectOption(label='Moderation', description='Get a list of moderation related commands.', emoji='<:maintenace:926794294017286165>'),
         ]
         super().__init__(placeholder='Choose Command Category', min_values=1, max_values=1, options=options)
 
@@ -62,6 +62,7 @@ class HelpDropdown(discord.ui.Select):
             embed.add_field(name=f"{c['prefix']}help",value="View this help menu.",inline=False)
             embed.add_field(name=f"{c['prefix']}stats",value="View bot stats.",inline=False)
             embed.add_field(name=f"{c['prefix']}ping",value="Get bot ping.",inline=False)
+            embed.add_field(name=f"{c['prefix']}vote",value="Vote for me on top.gg!",inline=False)
             embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "Fun":
@@ -122,8 +123,13 @@ async def stats(ctx):
 @bot.command(aliases=['botping'])
 async def ping(ctx):
     await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}ping")
-    em = discord.Embed(title="Pong!", description=f"{round(bot.latency * 1000)}ms", colour=discord.Colour.random())
-    await ctx.send(embed=em)
+    embed = discord.Embed(title="Pong!", description=f"{round(bot.latency * 1000)}ms", colour=discord.Colour.random())
+    await ctx.send(embed=embed)
+@bot.command(aliases=['votebot'])
+async def vote(ctx):
+    await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}ping")
+    embed = discord.Embed(description=" [Vote Here!](https://top.gg/bot/1037361246464393216/vote)", colour=discord.Colour.random())
+    await ctx.send(embed=embed)
 #--------------------------------Fun---------------------------------------
 #8Ball Command
 @bot.command(aliases=['8ball'])
