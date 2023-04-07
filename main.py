@@ -21,7 +21,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 bot = commands.AutoShardedBot(command_prefix = c['prefix'],intents=intents,status=discord.Status.idle,case_insensitive=True)
-#bot.remove_command('help')
+bot.remove_command('help')
 #------------------------------------------Bot Events-------------------------------------------------
 #Auto Updating Status
 async def StatusChange():
@@ -45,8 +45,61 @@ async def Webhooklogging(channel,message):
 async def on_ready():
     print(f'{bot.user} Is Now Online!')
     await bot.loop.create_task(StatusChange())
+#------------------------------------------Bot Menus-------------------------------------------------
+class HelpDropdown(discord.ui.Select):
+    def __init__(self):
+        options = [
+            discord.SelectOption(label='Info', description='Get a list of info related commands.', emoji='<:info:1071407819670175774>'),
+            discord.SelectOption(label='Fun', description='Get a list of fun related commands.', emoji='<:awesome:1093813270802075728>'),
+            discord.SelectOption(label='Utility', description='Get a list of utility related commands.', emoji='🟦'),
+            discord.SelectOption(label='Moderation', description='Get a list of moderation related commands.', emoji='🟥'),
+        ]
+        super().__init__(placeholder='Choose Command Category', min_values=1, max_values=1, options=options)
+
+    async def callback(self, interaction: discord.Interaction):
+        if self.values[0] == "Info":
+            embed=discord.Embed(title="Yellow Pterodactyl - Info Commands", colour=discord.Colour.random())
+            embed.add_field(name=f"{c['prefix']}help",value="View this help menu.",inline=False)
+            embed.add_field(name=f"{c['prefix']}stats",value="View bot stats.",inline=False)
+            embed.add_field(name=f"{c['prefix']}ping",value="Get bot ping.",inline=False)
+            embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
+            await interaction.response.edit_message(embed=embed)
+        elif self.values[0] == "Fun":
+            embed=discord.Embed(title="Yellow Pterodactyl - Fun Commands", colour=discord.Colour.random())
+            embed.add_field(name=f"{c['prefix']}8ball",value="Use a magic 8 ball.")
+            embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
+            await interaction.response.edit_message(embed=embed)
+        elif self.values[0] == "Utility":
+            embed=discord.Embed(title="Yellow Pterodactyl - Utility Commands", colour=discord.Colour.random())
+            embed.add_field(name=f"{c['prefix']}avatar",value="Grab someone's avatar.")
+            embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
+            await interaction.response.edit_message(embed=embed)
+        elif self.values[0] == "Moderation":
+            embed=discord.Embed(title="Yellow Pterodactyl - Moderation Commands", colour=discord.Colour.random())
+            embed.add_field(name=f"{c['prefix']}purge",value="Purge an amount of messages.")
+            embed.add_field(name=f"{c['prefix']}ban",value="Ban a user from your server.")
+            embed.add_field(name=f"{c['prefix']}unban",value="Unban a user from your server")
+            embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
+            await interaction.response.edit_message(embed=embed)
+        else:
+            embed=discord.Embed(title="Yellow Pterodactyl - Error!", description="Somehow you selected a choice i did not know was there!",colour=discord.Colour.red())
+            embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
+            await interaction.response.edit_message(embed=embed)
+
+
+class HelpDropdownView(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(HelpDropdown())
 #------------------------------------------Prefix Commands-------------------------------------------------
 #--------------------------------Info---------------------------------------
+#Help Command
+@bot.command(aliases=['bothelp'])
+async def help(ctx):
+    await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}help")
+    embed=discord.Embed(title="Yellow Pterodactyl", description="Version 2.0", colour=discord.Colour.random())
+    view = HelpDropdownView()
+    await ctx.send(view=view,embed=embed)
 #Stats Command
 @bot.command(name='stats', aliases=['botstats'])
 async def stats(ctx):
@@ -82,7 +135,7 @@ async def avatar(ctx,  member: discord.Member = None):
     embed.set_image(url=member.avatar.url)
     await ctx.send(embed=embed)
 #--------------------------------Moderation---------------------------------------
-#Avatar Command
+#Purge Command
 @bot.command(aliases=['purgemessages'])
 async def purge(ctx, amount: int = None):
     await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}purge {amount}")
@@ -96,4 +149,37 @@ async def purge(ctx, amount: int = None):
     message = await ctx.send(embed=embed)
     await asyncio.sleep(5)
     message.delete
+#Ban Command
+@bot.command(aliases=['banuser'])
+async def ban(ctx, member : discord.Member, *, reason = None):
+    await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}ban {member} {reason}")
+    if ctx.author.guild_permissions.ban_members:
+        try:
+            await member.ban(reason=reason)
+            embed = discord.Embed(colour=discord.Colour.blurple(), title="Banned!", description=f"{member} was banned by {ctx.author}!\nReason: {reason}")
+            await ctx.send(embed=embed)
+        except:
+            embed = discord.Embed(colour=discord.Colour.red(), title="Error!", description=f"I do not have enough permissions to ban {member} / they have a higher role than me.")
+            await ctx.send(embed=embed)
+    else:
+        embed = discord.Embed(colour=discord.Colour.red(), title="Error!", description=f"You do not have enough permissions to ban {member}")
+        await ctx.send(embed=embed)
+
+#Unban Command
+@bot.command(aliases=['unbanuser'])
+async def unban(ctx, *, member):
+    await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}unban {member}")
+    if ctx.author.guild_permissions.ban_members:
+        banned_users = ctx.guild.bans()
+        member_name, member_discriminator = member.split("#")
+        for ban_entry in banned_users:
+            user = ban_entry.user
+            if (user.name, user.discriminator) == (member_name, member_discriminator):
+                await ctx.guild.unban(user)
+                embed = discord.Embed(colour=discord.Colour.blurple(), title="Unbanned!", description=f"{member} has been unbanned by {ctx.author}")
+                await ctx.send(embed=embed)
+                return
+    else:
+        embed = discord.Embed(colour=discord.Colour.red(), title="Error!", description=f"You do not have enough permissions to ban {member}")
+        await ctx.send(embed=embed)
 bot.run(c['token'], log_handler=handler, log_level=logging.ERROR)
