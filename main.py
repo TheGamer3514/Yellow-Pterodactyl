@@ -66,19 +66,21 @@ class HelpDropdown(discord.ui.Select):
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "Fun":
             embed=discord.Embed(title="Yellow Pterodactyl - Fun Commands", colour=discord.Colour.random())
-            embed.add_field(name=f"{c['prefix']}8ball",value="Use a magic 8 ball.")
+            embed.add_field(name=f"{c['prefix']}8ball",value="Use a magic 8 ball.",inline=False)
             embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "Utility":
             embed=discord.Embed(title="Yellow Pterodactyl - Utility Commands", colour=discord.Colour.random())
-            embed.add_field(name=f"{c['prefix']}avatar",value="Grab someone's avatar.")
+            embed.add_field(name=f"{c['prefix']}avatar",value="Grab someone's avatar.",inline=False)
+            embed.add_field(name=f"{c['prefix']}serverinfo",value="Get info on the current server.",inline=False)
+            embed.add_field(name=f"{c['prefix']}userinfo",value="Get info on a user.",inline=False)
             embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "Moderation":
             embed=discord.Embed(title="Yellow Pterodactyl - Moderation Commands", colour=discord.Colour.random())
-            embed.add_field(name=f"{c['prefix']}purge",value="Purge an amount of messages.")
-            embed.add_field(name=f"{c['prefix']}ban",value="Ban a user from your server.")
-            embed.add_field(name=f"{c['prefix']}unban",value="Unban a user from your server")
+            embed.add_field(name=f"{c['prefix']}purge",value="Purge an amount of messages.",inline=False)
+            embed.add_field(name=f"{c['prefix']}ban",value="Ban a user from your server.",inline=False)
+            embed.add_field(name=f"{c['prefix']}unban",value="Unban a user from your server",inline=False)
             embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
             await interaction.response.edit_message(embed=embed)
         else:
@@ -89,7 +91,7 @@ class HelpDropdown(discord.ui.Select):
 
 class HelpDropdownView(discord.ui.View):
     def __init__(self):
-        super().__init__()
+        super().__init__(timeout=None)
         self.add_item(HelpDropdown())
 #------------------------------------------Prefix Commands-------------------------------------------------
 #--------------------------------Info---------------------------------------
@@ -117,6 +119,11 @@ async def stats(ctx):
     embed.add_field(name="Memory Usage", value=f"{psutil.virtual_memory().percent}%", inline=False)
     embed.add_field(name="Total Memory", value=f"{round(psutil.virtual_memory().total / (1024.0 **3))} GB", inline=False)
     await ctx.send(embed=embed)
+@bot.command(aliases=['botping'])
+async def ping(ctx):
+    await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}ping")
+    em = discord.Embed(title="Pong!", description=f"{round(bot.latency * 1000)}ms", colour=discord.Colour.random())
+    await ctx.send(embed=em)
 #--------------------------------Fun---------------------------------------
 #8Ball Command
 @bot.command(aliases=['8ball'])
@@ -125,7 +132,43 @@ async def magic8ball(ctx):
     embed=discord.Embed(title=":8ball: Magic 8 Ball :8ball:", description=ball8answers[random.randint(0, len(ball8answers)-1)], colour=discord.Colour.random())
     await ctx.send(embed=embed)
 #--------------------------------Utility---------------------------------------
-#Purge Command
+#Server Info Command
+@bot.command(aliases=['guildinfo'])  
+async def serverinfo(ctx):
+    await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}serverinfo")
+    role_count = len(ctx.guild.roles)
+    emoji_count = len(ctx.guild.emojis)
+    list_of_bots = [bot.mention for bot in ctx.guild.members if bot.bot]
+    embed = discord.Embed(title=f"Server Info - {ctx.guild.name}", description="Server Information", color=discord.Color.random())
+    embed.add_field(name="Server ID", value=ctx.guild.id, inline=False)
+    embed.add_field(name="Server Owner", value=ctx.guild.owner, inline=False)
+    embed.add_field(name="Verification Level", value=ctx.guild.verification_level, inline=False)
+    embed.add_field(name="Total Members", value=ctx.guild.member_count, inline=False)
+    embed.add_field(name="Total Bots", value=len(list_of_bots), inline=False)
+    embed.add_field(name="Total Text Channels", value=len(ctx.guild.text_channels), inline=False)
+    embed.add_field(name="Total Voice Channels", value=len(ctx.guild.voice_channels), inline=False)
+    embed.add_field(name="Total Categories", value=len(ctx.guild.categories), inline=False)
+    embed.add_field(name="Total Roles", value=role_count, inline=False)
+    embed.add_field(name="Total Emojis", value=emoji_count, inline=False)
+    embed.add_field(name="Created At", value=ctx.guild.created_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"), inline=False)
+    await ctx.send(embed=embed)
+#Userinfo Command
+@bot.command(aliases=['infouser'])
+async def userinfo(ctx, member: discord.Member = None):
+    if not member:
+        member = ctx.author
+    await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}userinfo {member}")
+    embed = discord.Embed(colour=member.color, timestamp=ctx.message.created_at)
+    embed.set_author(name=f"User Info - {member}")
+    embed.set_footer(text=f"Requested by {ctx.author}")
+    embed.add_field(name="ID:", value=member.id)
+    embed.add_field(name="Guild Name:", value=member.display_name)
+    embed.add_field(name="Created Account On:", value=member.created_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"))
+    embed.add_field(name="Joined Server On:", value=member.joined_at.strftime("%a, %#d %B %Y, %I:%M %p UTC"))
+    embed.add_field(name="Top Role:", value=member.top_role.mention)
+    embed.add_field(name="Bot?", value=member.bot)
+    await ctx.send(embed=embed)
+#Avatar Command
 @bot.command(aliases=['useravatar'])
 async def avatar(ctx,  member: discord.Member = None):
     if not member:
