@@ -70,6 +70,9 @@ class HelpDropdown(discord.ui.Select):
             embed=discord.Embed(title="Yellow Pterodactyl - Fun Commands", colour=discord.Colour.random())
             embed.add_field(name=f"{c['prefix']}8ball",value="Use a magic 8 ball.",inline=False)
             embed.add_field(name=f"{c['prefix']}cat",value="Generate an image of a cat.",inline=False)
+            embed.add_field(name=f"{c['prefix']}dog",value="Generate an image of a dog.",inline=False)
+            embed.add_field(name=f"{c['prefix']}donaldtweet",value="Post a tweet as Donald Trump.",inline=False)
+            embed.add_field(name=f"{c['prefix']}texttobraille",value="Convert text into braille.",inline=False)
             embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
             await interaction.response.edit_message(embed=embed)
         elif self.values[0] == "Utility":
@@ -103,6 +106,7 @@ async def help(ctx):
     quote = quotes[random.randint(0, len(quotes)-1)]
     embed=discord.Embed(title="Yellow Pterodactyl", description=f"**Version:** 2.0\nYellow Pterodactyl, a multipurpouse discord bot. Fun, Utility, Moderation and more to come! Why not give me a try?\n**Quote Of The Second:** {quote}", colour=discord.Colour.random())
     view = HelpDropdownView()
+    embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
     await ctx.send(view=view,embed=embed)
 #Stats Command
 @bot.command(name='stats', aliases=['botstats'])
@@ -150,6 +154,44 @@ async def cat(ctx):
     file = discord.File("temp/cat.png", filename="cat.png")
     embed.set_image(url="attachment://cat.png")
     await ctx.send(file=file,embed=embed)
+#Dog Command
+@bot.command(aliases=['dogimage'])
+async def dog(ctx):
+    response = requests.get(f"https://api.sillychat.tech/dog?key={c['sillychatapikey']}", stream=True)
+    with open('temp/dog.png', 'wb') as out_file:
+        shutil.copyfileobj(response.raw, out_file)
+    del response
+    await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}dog")
+    embed=discord.Embed(title="Dog 🐕", colour=discord.Colour.random())
+    file = discord.File("temp/dog.png", filename="dog.png")
+    embed.set_image(url="attachment://dog.png")
+    await ctx.send(file=file,embed=embed)
+#donaldtweet Command
+@bot.command(aliases=['trumptweet'])
+async def donaldtweet(ctx, *, text = None):
+    await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}donaldtweet {text}")
+    if not text:
+        embed=discord.Embed(title="Error!", description= f"Incorrect Usage!\n Correct Usage: {c['[prefix]']}donaldtweet [text]",colour=discord.Colour.red())
+        await ctx.send(embed=embed)
+    response = requests.get(f"https://un5vyw.deta.dev/tweet?text={text}", stream=True)
+    with open(f'temp/donaldtweet-{ctx.author.id}.png', 'wb') as out_file:
+        shutil.copyfileobj(response.raw, out_file)
+    del response
+    embed=discord.Embed(title="Tweet Successful!", colour=discord.Colour.random())
+    file = discord.File(f"temp/donaldtweet-{ctx.author.id}.png", filename="tweet.png")
+    embed.set_image(url="attachment://tweet.png")
+    await ctx.send(file=file,embed=embed)  
+#Texttobraille
+@bot.command(aliases=['braille'])
+async def texttobraille(ctx, *, text = None):
+    await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}texttobraille {text}")
+    if not text:
+        embed=discord.Embed(title="Error!", description= f"Incorrect Usage!\n Correct Usage: {c['[prefix]']}texttobraille [text]",colour=discord.Colour.red())
+        await ctx.send(embed=embed)
+    response = requests.get(f"https://api.sillychat.tech/texttobraille?text={text}")
+    response = response.json()
+    embed=discord.Embed(title="Braille Generated!", description=f"Text: {text}\nBraille: {response[0]['Braille']}", colour=discord.Colour.random())
+    await ctx.send(embed=embed)
 #--------------------------------Utility---------------------------------------
 #Server Info Command
 @bot.command(aliases=['guildinfo'])  
