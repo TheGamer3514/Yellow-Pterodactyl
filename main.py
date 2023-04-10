@@ -125,7 +125,7 @@ class HelpDropdownView(discord.ui.View):
 async def help(ctx):
     await Webhooklogging(c['webhookurl'], f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}help")
     quote = quotes[random.randint(0, len(quotes)-1)]
-    embed=discord.Embed(title="Yellow Pterodactyl", description=f"**Version:** 2.0\nYellow Pterodactyl, a multipurpouse discord bot. Fun, Utility, Moderation and more to come! Why not give me a try?\n**Quote Of The Second:** {quote}", colour=discord.Colour.random())
+    embed=discord.Embed(title="Yellow Pterodactyl", description=f"**Version:** 2.0\nYellow Pterodactyl, a multipurpose discord bot. Fun, Utility, Moderation and more to come! Why not give me a try?\n**Quote Of The Second:** {quote}", colour=discord.Colour.random())
     view = HelpDropdownView(ctx.author.id)
     embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
     await ctx.send(view=view,embed=embed)
