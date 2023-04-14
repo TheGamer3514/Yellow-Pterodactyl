@@ -103,6 +103,7 @@ class HelpDropdown(discord.ui.Select):
                 embed.add_field(name=f"{c['prefix']}avatar",value="Grab someone's avatar.",inline=False)
                 embed.add_field(name=f"{c['prefix']}serverinfo",value="Get info on the current server.",inline=False)
                 embed.add_field(name=f"{c['prefix']}userinfo",value="Get info on a user.",inline=False)
+                embed.add_field(name=f"{c['prefix']}summary",value="Generate a summary of the last 25 messages.",inline=False)
                 embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/4zTjIjkHc-SZduIGBSaA9mZFtMYawoVozGtzdoZUHm0/%3Fsize%3D1024/https/cdn.discordapp.com/avatars/1037361246464393216/f068ac884e61133caaa896a4a52e51cc.png")
                 await interaction.response.edit_message(embed=embed)
             else:
