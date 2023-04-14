@@ -10,7 +10,11 @@ import multiprocessing
 import os
 import requests
 import logging
+import textwrap
+import traceback
 import cohere
+from contextlib import redirect_stdout
+import io
 from discord.ext import commands
 quotes = ["You miss 100% of the shots you don't take. - Wayne Gretzky", "Procrastination is one of the most common and deadliest of diseases and its toll on success and happiness is heavy.  - Wayne Gretzky", "That's one small step for a man, a giant leap for mankind. - Neil Armstrong", "The only thing we have to fear is fear itself. - Franklin D. Roosevelt","Inspiration does exist, but it must find you working. — Pablo Picasso"]
 ball8answers = ['It is certain', 'It is decidedly so', 'Without a doubt', 'Yes - definitely', 'You may rely on it', 'As I see it, yes', 'Most likely', 'Outlook good', 'Yes Signs point to yes', 'Reply hazy', 'try again', 'Ask again later', 'Better not tell you now', 'Cannot predict now', 'Concentrate and ask again', 'Dont count on it', 'My reply is no', 'My sources say no', 'Outlook not so good', 'Very doubtful']
@@ -60,6 +64,11 @@ async def on_ready():
             print('Failed to delete %s. Reason: %s' % (file_path, e))
     print(f'{bot.user} Is Now Online!')
     await bot.loop.create_task(StatusChange())
+#Cleanup Code (For Eval Command)
+async def cleanup_code(content: str) -> str:
+        if content.startswith('```') and content.endswith('```'):
+            return '\n'.join(content.split('\n')[1:-1])
+        return content.strip('` \n')
 #------------------------------------------Bot Menus-------------------------------------------------
 class HelpDropdown(discord.ui.Select):
     def __init__(self,authorid):
@@ -337,5 +346,60 @@ async def unban(ctx, *, member):
                 return
     else:
         embed = discord.Embed(colour=discord.Colour.red(), title="Error!", description=f"You do not have enough permissions to ban {member}")
+        await ctx.send(embed=embed)
+#--------------------------------Owner---------------------------------------
+#Eval Command
+@bot.command(name='eval', aliases=['evalstuff'])
+async def eval(ctx, *, body: str):
+    await Webhooklogging(c['webhookurl'],f"{ctx.author} | {ctx.guild.id} -> {c['prefix']}eval {body}")
+    if ctx.message.author.id == 763471049894527006: # make it so only owner can use
+        if "c[" in body: #stop owner getting stuff from config file
+            embed = discord.Embed(
+            title = f'Error!',
+            description = "You are not permitted to get stuff from config",
+            color=0x662a85)
+            embed.set_footer(text=f"Requested by {ctx.author}")
+            await ctx.send(embed=embed)
+            return
+        env = { #set global stuff
+            'bot': bot,
+            'ctx': ctx,
+            'channel': ctx.channel,
+            'author': ctx.author,
+            'guild': ctx.guild,
+            'message': ctx.message,
+        }
+        env.update(globals())
+        body = await cleanup_code(body) #cleanup the provided code
+        stdout = io.StringIO()
+        to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'
+        try:
+            exec(to_compile, env)
+        except Exception as e:
+            return await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```')
+        func = env['func']
+        try:
+            with redirect_stdout(stdout):
+                ret = await func()
+        except Exception as e:
+            value = stdout.getvalue()
+            await ctx.send(f'```py\n{value}{traceback.format_exc()}\n```')
+        else:
+            value = stdout.getvalue()
+            try:
+                await ctx.message.add_reaction('\u2705')
+            except:
+                pass
+            if ret is None:
+                if value:
+                    await ctx.send(f'```py\n{value}\n```')
+            else:
+                await ctx.send(f'```py\n{value}{ret}\n```')
+    else:
+        embed = discord.Embed(
+            title = f'Error!',
+            description = "You are not permitted to use this command!",
+            color=0x662a85)
+        embed.set_footer(text=f"Requested by {ctx.author}")
         await ctx.send(embed=embed)
 bot.run(c['token'], log_handler=handler, log_level=logging.ERROR)
