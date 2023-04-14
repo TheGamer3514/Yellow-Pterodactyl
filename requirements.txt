@@ -1,3 +1,4 @@
 discord
 psutil
 discord_webhook
+cohere
