@@ -4,7 +4,8 @@
             "token": "token",
             "prefix": "!",
             "webhookurl": "discord webhook",
-            "sillychatapikey": "https://api.sillychat.tech"
+            "sillychatapikey": "https://api.sillychat.tech",
+            "coheretoken": ""
          }
     ]
 }

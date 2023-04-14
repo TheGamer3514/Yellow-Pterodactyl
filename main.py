@@ -7,8 +7,10 @@ from discord_webhook import DiscordWebhook
 import random
 import shutil
 import multiprocessing
+import os
 import requests
 import logging
+import cohere
 from discord.ext import commands
 quotes = ["You miss 100% of the shots you don't take. - Wayne Gretzky", "Procrastination is one of the most common and deadliest of diseases and its toll on success and happiness is heavy.  - Wayne Gretzky", "That's one small step for a man, a giant leap for mankind. - Neil Armstrong", "The only thing we have to fear is fear itself. - Franklin D. Roosevelt","Inspiration does exist, but it must find you working. — Pablo Picasso"]
 ball8answers = ['It is certain', 'It is decidedly so', 'Without a doubt', 'Yes - definitely', 'You may rely on it', 'As I see it, yes', 'Most likely', 'Outlook good', 'Yes Signs point to yes', 'Reply hazy', 'try again', 'Ask again later', 'Better not tell you now', 'Cannot predict now', 'Concentrate and ask again', 'Dont count on it', 'My reply is no', 'My sources say no', 'Outlook not so good', 'Very doubtful']
@@ -18,6 +20,7 @@ with open('./config.json') as f:
   data = json.load(f)
   for c in data['botConfig']:
         print('Prefix: ' + c['prefix'])
+co = cohere.Client(c['coheretoken'])
 #Define Bot
 intents = discord.Intents.default()
 intents.message_content = True
@@ -45,6 +48,16 @@ async def Webhooklogging(channel,message):
 #Event that runs when bot is online
 @bot.event
 async def on_ready():
+    folder = './temp'
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
     print(f'{bot.user} Is Now Online!')
     await bot.loop.create_task(StatusChange())
 #------------------------------------------Bot Menus-------------------------------------------------
@@ -260,6 +273,23 @@ async def avatar(ctx,  member: discord.Member = None):
     embed = discord.Embed(colour=discord.Colour.random(), title=f"{member}'s avatar")
     embed.set_image(url=member.avatar.url)
     await ctx.send(embed=embed)
+#Summary Command
+@bot.command(aliases=['summarizer'])
+async def Summary(ctx):
+    filename = f"temp/{ctx.channel.name}.txt"
+    with open(filename, "w") as file:
+        async for msg in ctx.channel.history(limit=25):
+            file.write(f"{msg.author.display_name}: {msg.clean_content}\n")
+    with open(filename, 'r') as file:
+        text = file.read().replace('\n', '')
+    try:
+        response = co.summarize(text=text,length="long",format="paragraph",extractiveness="high")
+        embed = discord.Embed(title=f"Summary",description=response.summary,colour=discord.Colour.random())
+        embed.set_footer(text="Note: This is just a summary of the last 25 messages. It is also very dumb")
+        await ctx.send(embed=embed)
+    except:
+        embed = discord.Embed(title=f"Error!",description="Failed to generate, please try again later.",colour=discord.Colour.red())
+        await ctx.send(embed=embed)
 #--------------------------------Moderation---------------------------------------
 #Purge Command
 @bot.command(aliases=['purgemessages'])
